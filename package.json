@@ -1,0 +1,21 @@
+{
+  "name": "google-sso-demo",
+  "version": "1.0.0",
+  "description": "Minimal Google SSO demo with Express, Postgres, and Render deployment.",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "migrate": "node scripts/migrate.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cookie-session": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "google-auth-library": "^9.15.0",
+    "pg": "^8.11.5"
+  }
+}
