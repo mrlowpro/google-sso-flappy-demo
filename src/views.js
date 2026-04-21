@@ -103,7 +103,7 @@ function renderLayout({ title, body, user = null, activeNav = "dashboard", pageD
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${escapeHtml(title)}</title>
-    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="page-shell">
@@ -326,7 +326,7 @@ function renderGamePage({ user, bestScore, leaderboardPreview, playToken }) {
       scoreSubmissionUrl: "/api/scores",
       sessionUrl: "/api/game/session"
     },
-    pageScript: "/static/game.js",
+    pageScript: "/game.js",
     body: `
       <section class="shell page-section">
         <div class="section-heading">

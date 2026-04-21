@@ -25,8 +25,13 @@ const {
 
 const config = getAppConfig();
 const app = express();
+const startupPromise = initDatabase();
 
 app.set("trust proxy", 1);
+// Vercel serves files from public/ at the root path, while local Express and Render
+// still benefit from explicit static middleware. Exposing both paths keeps all
+// environments working with the same templates.
+app.use(express.static(path.join(config.projectRoot, "public")));
 app.use("/static", express.static(path.join(config.projectRoot, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -56,6 +61,13 @@ function asyncHandler(handler) {
     Promise.resolve(handler(req, res, next)).catch(next);
   };
 }
+
+app.use(
+  asyncHandler(async (req, res, next) => {
+    await startupPromise;
+    next();
+  })
+);
 
 function getSingleQueryValue(value) {
   return typeof value === "string" ? value : null;
@@ -361,15 +373,17 @@ app.use((error, req, res, next) => {
   res.status(500).send(renderErrorPage(error.message || "Unexpected server error."));
 });
 
-async function start() {
-  await initDatabase();
-
-  app.listen(config.port, () => {
-    console.log(`Server running on http://localhost:${config.port}`);
-  });
+if (require.main === module) {
+  startupPromise
+    .then(() => {
+      app.listen(config.port, () => {
+        console.log(`Server running on http://localhost:${config.port}`);
+      });
+    })
+    .catch((error) => {
+      console.error("Failed to start the app:", error);
+      process.exit(1);
+    });
 }
 
-start().catch((error) => {
-  console.error("Failed to start the app:", error);
-  process.exit(1);
-});
+module.exports = app;

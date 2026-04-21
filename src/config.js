@@ -22,7 +22,8 @@ function getBaseConfig() {
     isProduction: nodeEnv === "production",
     databaseUrl: requireEnv("DATABASE_URL"),
     projectRoot: path.resolve(__dirname, ".."),
-    renderExternalUrl: process.env.RENDER_EXTERNAL_URL || ""
+    renderExternalUrl: process.env.RENDER_EXTERNAL_URL || "",
+    vercelProductionUrl: process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || ""
   };
 }
 
@@ -37,8 +38,12 @@ function getGoogleCallbackUrl(base) {
     return `${base.renderExternalUrl}/auth/google/callback`;
   }
 
+  if (base.isProduction && base.vercelProductionUrl) {
+    return `https://${base.vercelProductionUrl}/auth/google/callback`;
+  }
+
   throw new Error(
-    "Missing required environment variable: GOOGLE_CALLBACK_URL. In Render production, this can also be derived automatically from RENDER_EXTERNAL_URL."
+    "Missing required environment variable: GOOGLE_CALLBACK_URL. In production, this can also be derived automatically from Render or Vercel system URLs."
   );
 }
 
