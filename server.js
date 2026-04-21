@@ -29,10 +29,17 @@ const startupState = {
   error: null,
   ready: false
 };
-const startupPromise = initDatabase()
+const shouldInitSchemaOnStartup =
+  !config.isProduction || process.env.AUTO_MIGRATE_ON_START === "true";
+
+const startupPromise = (shouldInitSchemaOnStartup ? initDatabase() : Promise.resolve())
   .then(() => {
     startupState.ready = true;
-    console.log("Database schema is ready.");
+    console.log(
+      shouldInitSchemaOnStartup
+        ? "Database schema is ready."
+        : "Skipping schema initialization on production startup."
+    );
   })
   .catch((error) => {
     startupState.error = error;
