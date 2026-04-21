@@ -25,7 +25,20 @@ const {
 
 const config = getAppConfig();
 const app = express();
-const startupPromise = initDatabase();
+const startupState = {
+  error: null,
+  ready: false
+};
+const startupPromise = initDatabase()
+  .then(() => {
+    startupState.ready = true;
+    console.log("Database schema is ready.");
+  })
+  .catch((error) => {
+    startupState.error = error;
+    console.error("Database startup failed:", error);
+    throw error;
+  });
 
 app.set("trust proxy", 1);
 // Vercel serves files from public/ at the root path, while local Express and Render
@@ -61,6 +74,14 @@ function asyncHandler(handler) {
     Promise.resolve(handler(req, res, next)).catch(next);
   };
 }
+
+app.get("/health", (req, res) => {
+  res.status(startupState.error ? 503 : 200).json({
+    ok: !startupState.error,
+    startupReady: startupState.ready,
+    startupError: startupState.error ? startupState.error.message : null
+  });
+});
 
 app.use(
   asyncHandler(async (req, res, next) => {
@@ -157,10 +178,6 @@ app.get(
     res.send(renderLandingPage(leaderboardPreview));
   })
 );
-
-app.get("/health", (req, res) => {
-  res.json({ ok: true });
-});
 
 app.get("/auth/google", (req, res) => {
   const state = crypto.randomBytes(32).toString("hex");

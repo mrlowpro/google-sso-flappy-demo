@@ -13,7 +13,8 @@ const shouldUseSsl =
 
 const pool = new Pool({
   connectionString: databaseUrl,
-  ssl: shouldUseSsl ? { rejectUnauthorized: false } : false
+  ssl: shouldUseSsl ? { rejectUnauthorized: false } : false,
+  connectionTimeoutMillis: 10000
 });
 
 async function initDatabase() {
